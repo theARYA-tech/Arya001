@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard</title>
+
+<style>
+:root {
+    --bg: #f7f9fc;
+    --card: #ffffff;
+    --text: #0f172a;
+    --subtext: #64748b;
+    --border: #e2e8f0;
+
+    --primary: #6366f1;
+    --primary-hover: #4f46e5;
+    --danger: #ef4444;
+
+    --hover: rgba(99,102,241,0.08);
+    --shadow: 0 4px 20px rgba(0,0,0,0.06);
+}
+
+/* DARK MODE */
+.dark {
+    --bg: #0a0f1c;
+    --card: #111827;
+    --text: #e6edf3;
+    --subtext: #9aa4b2;
+    --border: #1f2937;
+
+    --primary: #7c83ff;
+    --primary-hover: #6366f1;
+    --danger: #f87171;
+
+    --hover: rgba(124,131,255,0.08);
+    --shadow: 0 8px 30px rgba(0,0,0,0.5);
+}
+
+body {
+    margin: 0;
+    font-family: Inter, system-ui;
+    background: var(--bg);
+    color: var(--text);
+    transition: 0.3s;
+}
+
+/* HEADER */
+.header {
+    max-width: 1200px;
+    margin: auto;
+    padding: 25px 20px;
+    display: flex;
+    justify-content: space-between;
+}
+
+/* CONTAINER */
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 0 20px 40px;
+}
+
+/* GRID */
+.grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+}
+
+@media(max-width:900px){
+    .grid { grid-template-columns: 1fr; }
+}
+
+/* CARD */
+.card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+    transition: 0.25s;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+}
+
+/* STATS */
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.stat {
+    text-align: center;
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+}
+
+/* INPUTS */
+input, select {
+    width: 100%;
+    padding: 11px;
+    margin-top: 10px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+}
+
+input::placeholder {
+    color: var(--subtext);
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+/* BUTTONS */
+button {
+    margin-top: 12px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+button:active {
+    transform: scale(0.96);
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--primary-hover);
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: white;
+}
+
+/* TASK */
+.task {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+    transition: all 0.2s ease;
+}
+
+.task:hover {
+    background: var(--hover);
+    transform: translateX(4px);
+}
+
+.done {
+    text-decoration: line-through;
+    color: var(--subtext);
+}
+
+/* ANIMATIONS */
+.fade-in {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {opacity:0; transform:translateY(6px);}
+    to {opacity:1; transform:translateY(0);}
+}
+
+.fade-out {
+    animation: fadeOut 0.25s forwards;
+}
+
+@keyframes fadeOut {
+    to {opacity:0; transform:translateX(10px);}
+}
+
+/* PROGRESS */
+.progress {
+    margin-bottom: 20px;
+    color: var(--subtext);
+}
+
+/* EMPTY STATE */
+.empty {
+    text-align: center;
+    color: var(--subtext);
+    padding: 20px;
+}
+
+/* TOGGLE */
+.toggle {
+    cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <h2>Dashboard</h2>
+    <div class="toggle" onclick="toggleDark()">🌙</div>
+</div>
+
+<div class="container">
+
+<div class="stats">
+    <div class="stat">Total: {{ total }}</div>
+    <div class="stat">Done: {{ completed }}</div>
+    <div class="stat">Pending: {{ pending }}</div>
+</div>
+
+<div class="progress" id="progress"></div>
+
+<div class="grid">
+
+<!-- LEFT -->
+<div>
+
+<div class="card">
+<h3>Add Task</h3>
+
+<input id="task" placeholder="What needs to be done?">
+<input type="datetime-local" id="due_date">
+
+<select id="priority">
+    <option>Low</option>
+    <option>Medium</option>
+    <option>High</option>
+</select>
+
+<button class="btn-primary" onclick="addTask()">Add Task</button>
+</div>
+
+<div class="card">
+<h3>Tasks</h3>
+
+<div id="task-list">
+{% for t in tasks %}
+<div class="task fade-in {% if t.done %}done{% endif %}" 
+     id="task-{{t.id}}" 
+     data-done="{{t.done}}">
+
+    <div onclick="toggleTask({{t.id}})">
+        {{ t.task }}<br>
+        <small>{{ t.due_date or '-' }}</small>
+    </div>
+
+    <button class="btn-danger" onclick="deleteTask({{t.id}})">✕</button>
+</div>
+{% else %}
+<p class="empty" id="empty">No tasks yet.</p>
+{% endfor %}
+</div>
+
+</div>
+
+</div>
+
+<!-- RIGHT -->
+<div>
+
+<div class="card notes">
+<h3>Notes</h3>
+
+<form method="POST" action="/add_note">
+    <input name="note" placeholder="Write something...">
+    <button class="btn-primary">Add</button>
+</form>
+
+<ul>
+{% for n in notes %}
+<li>{{ n.content }} <a href="/delete_note/{{n.id}}">✕</a></li>
+{% endfor %}
+</ul>
+</div>
+
+<div class="card">
+<a href="/send_report">
+    <button class="btn-primary">Send Report</button>
+</a>
+
+<a href="/logout">
+    <button class="btn-danger">Logout</button>
+</a>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+// CREATE TASK ELEMENT
+function createTaskElement(t){
+    let div = document.createElement("div");
+    div.className = "task fade-in " + (t.done ? "done" : "");
+    div.id = "task-" + t.id;
+    div.dataset.done = t.done ? "1" : "0";
+
+    div.innerHTML = `
+        <div onclick="toggleTask(${t.id})">
+            ${t.task}<br>
+            <small>${t.due_date || '-'}</small>
+        </div>
+        <button class="btn-danger" onclick="deleteTask(${t.id})">✕</button>
+    `;
+
+    return div;
+}
+
+// ADD TASK
+function addTask(){
+    let task = document.getElementById("task").value;
+    let due = document.getElementById("due_date").value;
+    let priority = document.getElementById("priority").value;
+
+    if(!task.trim()) return;
+
+    fetch("/add_task_ajax", {
+        method:"POST",
+        headers:{"Content-Type":"application/x-www-form-urlencoded"},
+        body:`task=${task}&due_date=${due}&priority=${priority}`
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        let list = document.getElementById("task-list");
+
+        let empty = document.getElementById("empty");
+        if(empty) empty.remove();
+
+        list.prepend(createTaskElement(data));
+
+        document.getElementById("task").value = "";
+        document.getElementById("due_date").value = "";
+
+        updateProgress();
+    });
+}
+
+// TOGGLE TASK
+function toggleTask(id){
+    let el = document.getElementById("task-" + id);
+
+    el.classList.toggle("done");
+
+    let isDone = el.classList.contains("done");
+    el.dataset.done = isDone ? "1" : "0";
+
+    fetch("/toggle_ajax/"+id,{method:"POST"});
+
+    updateProgress();
+}
+
+// DELETE TASK
+function deleteTask(id){
+    let el = document.getElementById("task-" + id);
+
+    el.classList.add("fade-out");
+
+    setTimeout(()=>{
+        el.remove();
+        fetch("/delete_ajax/"+id,{method:"POST"});
+
+        if(document.querySelectorAll(".task").length === 0){
+            document.getElementById("task-list").innerHTML =
+                '<p class="empty" id="empty">No tasks yet.</p>';
+        }
+
+        updateProgress();
+    },200);
+}
+
+// DARK MODE
+function toggleDark(){
+    document.body.classList.toggle("dark");
+    localStorage.setItem("dark", document.body.classList.contains("dark"));
+}
+
+if(localStorage.getItem("dark")==="true"){
+    document.body.classList.add("dark");
+}
+
+// PROGRESS
+function updateProgress(){
+    let tasks = document.querySelectorAll(".task");
+    let done = 0;
+
+    tasks.forEach(t=>{
+        if(t.dataset.done=="1") done++;
+    });
+
+    let percent = tasks.length ? Math.floor((done/tasks.length)*100) : 0;
+    document.getElementById("progress").innerText = "Progress: "+percent+"%";
+}
+
+window.onload = updateProgress;
+
+</script>
+
+</body>
+</html>

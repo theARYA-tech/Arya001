@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body {
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    background:#0a0f1c;
+    color:white;
+    font-family:Inter;
+}
+
+h1 {
+    font-size:40px;
+    animation: pop 0.6s ease;
+}
+
+@keyframes pop {
+    from {transform:scale(0.7); opacity:0;}
+    to {transform:scale(1); opacity:1;}
+}
+</style>
+</head>
+
+<body>
+
+<h1>Welcome 🎉</h1>
+
+<script>
+setTimeout(()=>{
+    window.location.href="/dashboard";
+}, 2000);
+</script>
+
+</body>
+</html>

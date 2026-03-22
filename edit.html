@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Edit Task</title>
+<style>
+body { font-family: Arial; padding: 40px; }
+form { max-width: 400px; margin: auto; }
+input, select, button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+}
+</style>
+</head>
+<body>
+
+<h2>Edit Task</h2>
+
+<form method="post">
+    <input name="task" value="{{ task.task }}" required>
+
+    <input type="datetime-local" name="due_date" required>
+
+    <select name="priority">
+        <option value="low" {% if task.priority == "low" %}selected{% endif %}>Low</option>
+        <option value="medium" {% if task.priority == "medium" %}selected{% endif %}>Medium</option>
+        <option value="high" {% if task.priority == "high" %}selected{% endif %}>High</option>
+    </select>
+
+    <button>Update</button>
+</form>
+
+</body>
+</html>
